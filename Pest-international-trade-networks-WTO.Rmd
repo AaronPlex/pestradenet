@@ -1,0 +1,536 @@
+---
+title: "Pest introduction risk based on international trade"
+author: "Aaron Plex"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Organizing trade data:
+```{r, message=FALSE}
+library(tidyverse)
+#library(dplyr)
+
+cropTradeWTO<-read.csv("WTO-Tomato-Trade-2011-2020.csv")
+cropTradeWTO<-cropTradeWTO[,c("Reporting.Economy", "Partner.Economy", "Year", "Value")]
+colnames(cropTradeWTO)<-c("ImportCountry", "ExportCountry", "Year", "Value")
+years<-length(unique(cropTradeWTO$Year))
+
+cropTradeWTO <- cropTradeWTO %>%
+  group_by(ExportCountry, ImportCountry) %>%
+  summarise(YearTradeMean = sum(Value, na.rm = TRUE)/years) %>%
+  filter(YearTradeMean > 0) %>%
+  mutate(YearTradeMean = (YearTradeMean / max(YearTradeMean))^(1/4))
+
+#Replacing long names to abbreviations in edgelist
+cropTradeWTO[cropTradeWTO == c("Antigua and Barbuda")] <- c("ANTI")
+cropTradeWTO[cropTradeWTO == c("Bahrain, Kingdom of")] <- c("Bahrain")
+cropTradeWTO[cropTradeWTO == c("Bolivia, Plurinational State of")] <- c("Bolivia")
+cropTradeWTO[cropTradeWTO == c("Bosnia and Herzegovina")] <- c("BiH")
+cropTradeWTO[cropTradeWTO == c("Central African Republic")] <- c("CF")
+cropTradeWTO[cropTradeWTO == c("China, mainland")] <- c("China")
+cropTradeWTO[cropTradeWTO == c("Democratic Republic of the Congo")] <- c("Congo-Kinshasa")
+cropTradeWTO[cropTradeWTO == c("Congo, Democratic Republic of the")] <- c("Congo-Kinshasa")
+cropTradeWTO[cropTradeWTO == c("Congo, Republic of the")] <- c("Congo Republic")
+cropTradeWTO[cropTradeWTO == c("Czech Republic")] <- c("Czechia")
+cropTradeWTO[cropTradeWTO == c("Dominican Republic")] <- c("DOM")
+cropTradeWTO[cropTradeWTO == c("Hong Kong, China")] <- c("Hong Kong")
+cropTradeWTO[cropTradeWTO == c("Iran (Islamic Republic of)")] <- c("Iran")
+cropTradeWTO[cropTradeWTO == c("C\xf4te d'Ivoire")] <- c("Ivory Coast")
+cropTradeWTO[cropTradeWTO == c("Saint Kitts and Nevis")] <- c("KN")
+cropTradeWTO[cropTradeWTO == c("Kuwait, the State of")] <- c("Kuwait")
+cropTradeWTO[cropTradeWTO == c("Kyrgyzstan")] <- c("Kyr") 	
+cropTradeWTO[cropTradeWTO == c("Kyrgyz Republic")] <- c("Kyr")
+cropTradeWTO[cropTradeWTO == c("Lao People's Democratic Republic")] <- c("Laos") 
+cropTradeWTO[cropTradeWTO == c("Lebanese Republic")] <- c("Lebanon")
+cropTradeWTO[cropTradeWTO == c("Macao, China")] <- c("Macao")
+cropTradeWTO[cropTradeWTO == c("Micronesia (Federated States of)")] <- c("Micronesia")
+cropTradeWTO[cropTradeWTO == c("Moldova, Republic of")] <- c("Moldova")
+cropTradeWTO[cropTradeWTO == c("Democratic People's Republic of Korea")] <- c("North Korea")
+cropTradeWTO[cropTradeWTO == c("Papua New Guinea")] <- c("PNG")
+cropTradeWTO[cropTradeWTO == c("Russian Federation")] <- c("Russia")
+cropTradeWTO[cropTradeWTO == c("Saudi Arabia, Kingdom of")] <- c("SB") 
+cropTradeWTO[cropTradeWTO == c("Slovak Republic")] <- c("Slovakia")
+cropTradeWTO[cropTradeWTO == c("Korea, Republic of")] <- c("South Korea")
+cropTradeWTO[cropTradeWTO == c("Sao Tome and Principe")] <- c("STD")
+cropTradeWTO[cropTradeWTO == c("Syrian Arab Republic")] <- c("Syria")
+cropTradeWTO[cropTradeWTO == c("China, Taiwan Province of")] <- c("Taiwan")
+cropTradeWTO[cropTradeWTO == c("United Republic of Tanzania")] <- c("Tanzania")
+cropTradeWTO[cropTradeWTO == c("Trinidad and Tobago")] <- c("TT")
+cropTradeWTO[cropTradeWTO == c("T\xfcrkiye")] <- c("Turkey")
+cropTradeWTO[cropTradeWTO == c("United Arab Emirates")] <- c("UAE")
+cropTradeWTO[cropTradeWTO == c("United Kingdom")] <- c("UK")
+cropTradeWTO[cropTradeWTO == c("United States of America")] <- c("USA")
+cropTradeWTO[cropTradeWTO == c("Saint Vincent and the Grenadines")] <- c("VC")
+cropTradeWTO[cropTradeWTO == c("Venezuela, Bolivarian Republic of")] <- c("Venezuela")
+cropTradeWTO[cropTradeWTO == c("Viet Nam")] <- c("Vietnam")
+
+cropTradeWTO <- data.frame(cropTradeWTO)
+
+# Generating a country node list
+CountryNodes1 <- as.vector(cropTradeWTO$ExportCountry)
+CountryNodes2 <- as.vector(cropTradeWTO$ImportCountry)
+CountryNodes <- rbind(CountryNodes1, CountryNodes2)
+CountryNodes <- as.vector(CountryNodes)
+CountryNodes <- as.matrix(CountryNodes)
+colnames(CountryNodes) <- c("ExportCountry")
+CountryNodes <- unique(CountryNodes)
+```
+
+
+## Host distribution at the country level
+```{r}
+host.distribution<-read.csv("FAOSTAT-Tomato-harveste-area-2011-2020.csv")
+host.distribution<-host.distribution[,c("Area","Year","Value")]
+colnames(host.distribution)<-c("ExportCountry","Year","HostArea")
+
+host.distribution <- as_tibble(host.distribution) %>%
+  group_by(ExportCountry) %>% # Calculating mean annual harvested area
+  summarise(HostArea = mean(HostArea, na.rm = TRUE)) %>%
+  filter(HostArea > 0) %>%  # Keeping country where crop is present
+  mutate(HostArea = log10(HostArea+11/10)) # Log-transformation to reduce skenness
+
+host.distribution[host.distribution == c("Antigua and Barbuda")] <- c("ANTI")
+host.distribution[host.distribution == c("Bahrain, Kingdom of")] <- c("Bahrain")
+host.distribution[host.distribution == c("Bolivia (Plurinational State of)")] <- c("Bolivia")
+host.distribution[host.distribution == c("Bosnia and Herzegovina")] <- c("BiH")
+host.distribution[host.distribution == c("Central African Republic")] <- c("CF")
+host.distribution[host.distribution == c("China, mainland")] <- c("China")
+host.distribution[host.distribution == c("Democratic Republic of the Congo")] <- c("Congo-Kinshasa")
+host.distribution[host.distribution == c("Congo, Democratic Republic of the")] <- c("Congo-Kinshasa")
+host.distribution[host.distribution == c("Congo, Republic of the")] <- c("Congo Republic")
+host.distribution[host.distribution == c("Congo")] <- c("Congo Republic")
+host.distribution[host.distribution == c("Dominican Republic")] <- c("DOM")
+host.distribution[host.distribution == c("China, Hong Kong SAR")] <- c("Hong Kong")
+host.distribution[host.distribution == c("Iran (Islamic Republic of)")] <- c("Iran")
+host.distribution[host.distribution == c("C\xf4te d'Ivoire")] <- c("Ivory Coast")
+host.distribution[host.distribution == c("Côte d'Ivoire")] <- c("Ivory Coast")
+host.distribution[host.distribution == c("Saint Kitts and Nevis")] <- c("KN")
+host.distribution[host.distribution == c("Kyrgyzstan")] <- c("Kyr")
+host.distribution[host.distribution == c("Lao People's Democratic Republic")] <- c("Laos")
+host.distribution[host.distribution == c("China, Macao SAR")] <- c("Macao")
+host.distribution[host.distribution == c("Micronesia (Federated States of)")] <- c("Micronesia")
+host.distribution[host.distribution == c("Republic of Moldova")] <- c("Moldova")
+host.distribution[host.distribution == c("Netherlands (Kingdom of the)")] <- c("Netherlands")
+host.distribution[host.distribution == c("Democratic People's Republic of Korea")] <- c("North Korea")
+host.distribution[host.distribution == c("Papua New Guinea")] <- c("PNG")
+host.distribution[host.distribution == c("Russian Federation")] <- c("Russia")
+host.distribution[host.distribution == c("Saudi Arabia")] <- c("SB")
+host.distribution[host.distribution == c("Republic of Korea")] <- c("South Korea")
+host.distribution[host.distribution == c("Sao Tome and Principe")] <- c("STD")
+host.distribution[host.distribution == c("Syrian Arab Republic")] <- c("Syria")
+host.distribution[host.distribution == c("China, Taiwan Province of")] <- c("Taiwan")
+host.distribution[host.distribution == c("United Republic of Tanzania")] <- c("Tanzania")
+host.distribution[host.distribution == c("Trinidad and Tobago")] <- c("TT")
+host.distribution[host.distribution == c("Türkiye")] <- c("Turkey")
+host.distribution[host.distribution == c("United Arab Emirates")] <- c("UAE")
+host.distribution[host.distribution == c("United Kingdom of Great Britain and Northern Ireland")] <- c("UK")
+host.distribution[host.distribution == c("United Kingdom")] <- c("UK")
+host.distribution[host.distribution == c("United States of America")] <- c("USA")
+host.distribution[host.distribution == c("Saint Vincent and the Grenadines")] <- c("VC")
+host.distribution[host.distribution == c("Venezuela (Bolivarian Republic of)")] <- c("Venezuela")
+host.distribution[host.distribution == c("Viet Nam")] <- c("Vietnam")
+```
+
+
+## Pest distribution at the country level
+```{r message=FALSE, warning=FALSE}
+PestDistribution <- read.csv("C:/Users/plexaaron/UFL Dropbox/Aaron Plex Sula/168/2022/2022 Projects/Pathogen biogeography/Pathogen richness and diversity/Tomato/Tuta absoluta.csv")
+PestDistribution<-PestDistribution[,c("Region","Presence", "Extent", "First.record")]
+colnames(PestDistribution)<-c("ExportCountry","Presence", "Extent", "First.record")
+
+# Identifying which regions are sub national observations
+is.subnational = (PestDistribution[grepl(" - ", PestDistribution$ExportCountry), ])
+subnations = is.subnational$ExportCountry
+
+# Excluding pest observations at sub national extent
+PestDistribution = PestDistribution %>%
+  filter(!ExportCountry %in% subnations)
+
+# Replacing extent categories with values in a numeric scale between 1 to 5
+PestDistribution<-PestDistribution %>%
+  mutate(Extent = ifelse(Extent == "-"  | Extent == "Extent not recorded" & Presence == "Present", "Present", Extent))
+PestDistribution$ExtentCat<-PestDistribution$Extent
+
+PestDistribution[PestDistribution$Extent == "Widespread",3] <- c("5")
+PestDistribution[PestDistribution$Extent == "Native",3] <- c("5")
+PestDistribution[PestDistribution$Extent == "Present",3] <- c("4")
+PestDistribution[PestDistribution$Extent == "Localized",3] <- c("3")
+PestDistribution[PestDistribution$Extent == "Few occurrences",3] <- c("2")
+PestDistribution[PestDistribution$Extent == "Transient under surveillance",3] <- c("2")
+PestDistribution[PestDistribution$Extent == "Transient under eradication",3] <- c("1")
+PestDistribution$Extent<-as.numeric(PestDistribution$Extent)
+
+# Replacing long country names
+PestDistribution[PestDistribution == c("Antigua and Barbuda")] <- c("ANTI")
+PestDistribution[PestDistribution == c("Bahrain, Kingdom of")] <- c("Bahrain")
+PestDistribution[PestDistribution == c("Bolivia (Plurinational State of)")] <- c("Bolivia")
+PestDistribution[PestDistribution == c("Bosnia and Herzegovina")] <- c("BiH")
+PestDistribution[PestDistribution == c("Central African Republic")] <- c("CF")
+PestDistribution[PestDistribution == c("China, mainland")] <- c("China")
+PestDistribution[PestDistribution == c("Democratic Republic of the Congo")] <- c("Congo-Kinshasa")
+PestDistribution[PestDistribution == c("Congo, Democratic Republic of the")] <- c("Congo-Kinshasa")
+PestDistribution[PestDistribution == c("Congo, Republic of the")] <- c("Congo Republic")
+PestDistribution[PestDistribution == c("Czech Republic")] <- c("Czechia")
+PestDistribution[PestDistribution == c("Dominican Republic")] <- c("DOM")
+PestDistribution[PestDistribution == c("China, Hong Kong SAR")] <- c("Hong Kong")
+PestDistribution[PestDistribution == c("Iran (Islamic Republic of)")] <- c("Iran")
+PestDistribution[PestDistribution == c("C\xf4te d'Ivoire")] <- c("Ivory Coast")
+PestDistribution[PestDistribution == c("Saint Kitts and Nevis")] <- c("KN")
+PestDistribution[PestDistribution == c("Kyrgyzstan")] <- c("Kyr")
+PestDistribution[PestDistribution == c("Lao People's Democratic Republic")] <- c("Laos")
+PestDistribution[PestDistribution == c("China, Macao SAR")] <- c("Macao")
+PestDistribution[PestDistribution == c("Micronesia (Federated States of)")] <- c("Micronesia")
+PestDistribution[PestDistribution == c("Republic of Moldova")] <- c("Moldova")
+PestDistribution[PestDistribution == c("Democratic People's Republic of Korea")] <- c("North Korea")
+PestDistribution[PestDistribution == c("Papua New Guinea")] <- c("PNG")
+PestDistribution[PestDistribution == c("Russian Federation")] <- c("Russia")
+PestDistribution[PestDistribution == c("Saudi Arabia")] <- c("SB")
+PestDistribution[PestDistribution== c("Republic of Korea")] <- c("South Korea")
+PestDistribution[PestDistribution == c("Sao Tome and Principe")] <- c("STD")
+PestDistribution[PestDistribution == c("Syrian Arab Republic")] <- c("Syria")
+PestDistribution[PestDistribution == c("China, Taiwan Province of")] <- c("Taiwan")
+PestDistribution[PestDistribution == c("United Republic of Tanzania")] <- c("Tanzania")
+PestDistribution[PestDistribution == c("Trinidad and Tobago")] <- c("TT")
+PestDistribution[PestDistribution == c("United Arab Emirates")] <- c("UAE")
+PestDistribution[PestDistribution == c("United Kingdom")] <- c("UK")
+PestDistribution[PestDistribution == c("United Kingdom of Great Britain and Northern Ireland")] <- c("UK")
+PestDistribution[PestDistribution == c("United States")] <- c("USA")
+PestDistribution[PestDistribution == c("United States of America")] <- c("USA")
+PestDistribution[PestDistribution == c("Saint Vincent and the Grenadines")] <- c("VC")
+PestDistribution[PestDistribution == c("Venezuela (Bolivarian Republic of)")] <- c("Venezuela")
+PestDistribution[PestDistribution == c("Viet Nam")] <- c("Vietnam")
+
+PestHostdf<-merge(PestDistribution, host.distribution, by = 'ExportCountry', all = TRUE)
+
+analysis.year<-2024
+TradingCountries = merge(PestHostdf, CountryNodes, by = 'ExportCountry', all.y = TRUE)
+TradingCountries = TradingCountries %>%
+  mutate(First.record = as.numeric(First.record)) %>%
+  distinct(ExportCountry, .keep_all = TRUE) %>%
+  replace_na(list(Presence = "Unreported", 
+             Extent = 0,
+             First.record = analysis.year,
+             ExtentCat = "Unreported",
+             HostArea = log10(11/10))) %>%
+  mutate(pest.age = analysis.year+1-First.record,
+         country.type = ifelse(HostArea==log10(11/10),"Intermediary","Producer"))
+```
+
+
+## Converting trade matrix into a pest movement network
+```{r, message=FALSE}
+library(igraph)
+TradeNet <- graph_from_data_frame(d= cropTradeWTO, 
+                                  vertices = TradingCountries, 
+                                  directed = T)
+
+#Extracting an international trade matrix
+tradeMatrix = as.matrix(as_adjacency_matrix(TradeNet, attr = "YearTradeMean"))
+
+#Creating a matrix of pest extent
+pestmatr = TradingCountries$Extent 
+pestmatr1 <- matrix(pestmatr, , 1) #source country
+pestmatr2 <- matrix(pestmatr, 1, ) #destination country
+pestmatrix <- pestmatr1 %*% (1/(pestmatr2+1))
+pestmatrix <- (2^pestmatrix)/(2^5)
+pestmatrix=as.matrix(pestmatrix)
+
+columnnames=c(TradingCountries$ExportCountry)
+colnames(pestmatrix)=c(columnnames)
+rownames(pestmatrix)=c(columnnames)
+
+#Creating a matrix of pest duration in a country
+pest.duration<-TradingCountries$pest.age
+pest.age1 <- matrix(pest.duration, ,1) #source country
+pest.age2 <- matrix(pest.duration, 1, )
+pest.age2[] <- 1
+page.matrix <- pest.age1 %*% pest.age2
+#page.matrix <- page.matrix / max(page.matrix)
+
+colnames(page.matrix)=c(columnnames)
+rownames(page.matrix)=c(columnnames)
+
+#Creating a matrix of host availability
+hostmatr = TradingCountries$HostArea
+hostmatr = hostmatr / max(hostmatr)
+hostmatr1 <- matrix(hostmatr, , 1)
+hostmatr2 <- matrix(hostmatr, 1, )
+hostmatrix <- hostmatr1 %*% hostmatr2
+hostmatrix=as.matrix(hostmatrix)
+
+colnames(hostmatrix)=c(columnnames)
+rownames(hostmatrix)=c(columnnames)
+
+##Creating a matrix of host availability
+#biomatr = TradingCountries$Biosecurity # yest = 10, no = 1
+#biomatr = 1 / biomatr
+#biomatr1 <- matrix(biomatr, , 1)
+#biomatr2 <- matrix(biomatr, 1, )
+#biomatrix <- biomatr1 %*% biomatr2
+#biomatrix=as.matrix(biomatrix)
+
+#colnames(biomatrix)=c(columnnames)
+#rownames(biomatrix)=c(columnnames)
+
+#Gravity model for pest trade movement potential which is 
+#trade matrix time pest matrix times host matrix
+#I propose the name of this combination:
+#Geographic trade risk for pathogen introduction
+geoTradeRisk = pestmatrix * tradeMatrix * hostmatrix * page.matrix #* biomatrix
+
+#To convert from matrix to an edgelist
+library(reshape2)
+PestMoveLinks=melt(geoTradeRisk) %>%
+  rename(ExportCountry=Var1,
+         ImportCountry=Var2,
+         GeoTradeRisk=value) %>%
+  mutate(GeoTradeRisk=replace(GeoTradeRisk, GeoTradeRisk == 0.0000000, 0)) %>%
+  filter(GeoTradeRisk>0)
+
+#Generating a network for international pest movement
+pestMoveNet = graph_from_data_frame(d = PestMoveLinks, 
+                                  vertices = TradingCountries, 
+                                  directed = T)
+```
+
+
+## Node in-strength as a measure of pest introduction risk
+```{r, fig.width=18, fig.height=15, dpi=200, message=FALSE}
+library(ggraph)
+library(ggplot2)
+library(RColorBrewer)
+
+E(pestMoveNet)$weight <- E(pestMoveNet)$GeoTradeRisk
+
+country.strength <- strength(pestMoveNet, v = V(pestMoveNet), mode = c("in"), weights = E(pestMoveNet)$weight)
+
+strength.net <- ggraph(pestMoveNet, layout = "centrality", cent = country.strength^(1/4))+
+  geom_edge_link(aes(edge_width = GeoTradeRisk, 
+                      start_cap = circle(.3), 
+                      end_cap = circle(.3)),                  
+                  edge_colour = "darkgrey",
+                  arrow = arrow(angle = 30, 
+                                length = unit(0.15, "inches")))+
+  geom_node_point(aes(fill = ExtentCat,
+                      color = ExtentCat,
+                      size = HostArea), 
+                  shape = 21)+
+  geom_node_text(aes(label = name), size = 6, 
+                 repel = TRUE)+
+  scale_edge_width_continuous(range = c(0.005,1))+
+  scale_size_continuous(range = c(1,10))+
+  scale_fill_manual(values = c("Unreported" = "#FCB519FF", "Transient under eradication" = "#F98C0AFF", "Few occurrences" = "#E35932FF", "Localized" = "#BB3754FF", "Present" = "#89226AFF", "Widespread" =  "#56106EFF"))+
+  scale_color_manual(values = c("Unreported" = "#FCB519FF", "Transient under eradication" = "#F98C0AFF", "Few occurrences" = "#E35932FF", "Localized" = "#BB3754FF", "Present" = "#89226AFF", "Widespread" =  "#56106EFF"))+
+  coord_fixed()+
+  theme_graph()+
+  theme(legend.position = "right", 
+        legend.key.size = unit(1, 'cm'))
+
+strength.net + 
+  guides(fill = guide_legend(title = "Reported distribution: \nTuta absoluta",
+                                title.position = "top", 
+                                override.aes = list(size = 10), 
+                             title.theme = element_text(size = 15), 
+                             label.theme = element_text(size = 15)),
+         color = guide_legend(title = "Reported distribution: \nTuta absoluta",
+                                title.position = "top", 
+                                override.aes = list(size = 10), 
+                             title.theme = element_text(size = 15), 
+                             label.theme = element_text(size = 15)),
+            size = guide_legend(title = "Harvested \ntomato \nlog10(acreage)", 
+                                title.theme = element_text(size = 15), 
+                                label.theme = element_text(size = 15)), 
+            edge_width = guide_legend(title = "Pest trade \nmovement potential", 
+                                      title.theme = element_text(size = 15), 
+                                      label.theme = element_text(size = 15))
+         )
+```
+
+## Introduction risk in the Caribbean Region and USA
+```{r, fig.width=15, fig.height=11, dpi=250, message=FALSE}
+focused.countries<-c("ANTI","Bahamas","Barbados","Cuba","DOM","Dominica","Haiti",
+                     "Jamaica","KN","Saint Lucia","TT","VC","USA")
+focused.PestMove<-PestMoveLinks %>%
+  filter(ImportCountry %in% focused.countries)
+focused.TradingCountries<-TradingCountries %>% 
+  filter(ExportCountry %in% unique(c(focused.PestMove$ExportCountry,focused.PestMove$ImportCountry)))
+focused.PestNet = graph_from_data_frame(d = focused.PestMove,
+                                        vertices = focused.TradingCountries,
+                                        directed = T)
+
+focused.net <- ggraph(focused.PestNet, layout = "stress")+
+  geom_edge_link(aes(edge_width = GeoTradeRisk, 
+                      start_cap = circle(.3), 
+                      end_cap = circle(.3)),                  
+                  edge_colour = "darkgrey",
+                  arrow = arrow(angle = 30, 
+                                length = unit(0.15, "inches")))+
+  geom_node_point(aes(fill = ExtentCat,
+                      color = ExtentCat,
+                      size = HostArea), 
+                  shape = 21)+
+  geom_node_text(aes(label = name), size = 6, 
+                 repel = TRUE)+
+  scale_edge_width_continuous(range = c(0.3,2.5))+
+  scale_size_continuous(range = c(1,10))+
+  scale_fill_manual(values = c("Unreported" = "#FCB519FF", "Transient under eradication" = "#F98C0AFF", "Few occurrences" = "#E35932FF", "Localized" = "#BB3754FF", "Present" = "#89226AFF", "Widespread" =  "#56106EFF"))+
+  scale_color_manual(values = c("Unreported" = "#FCB519FF", "Transient under eradication" = "#F98C0AFF", "Few occurrences" = "#E35932FF", "Localized" = "#BB3754FF", "Present" = "#89226AFF", "Widespread" =  "#56106EFF"))+
+  coord_fixed()+
+  theme_graph()+
+  theme(legend.position = "right", 
+        legend.key.size = unit(1, 'cm'))
+
+focused.net<-focused.net + 
+  guides(fill = guide_legend(title = "Reported distribution \nTuta absoluta",
+                                title.position = "top", 
+                                override.aes = list(size = 10), 
+                             title.theme = element_text(size = 15), 
+                             label.theme = element_text(size = 15)),
+         color = guide_legend(title = "Reported distribution \nTuta absoluta",
+                                title.position = "top", 
+                                override.aes = list(size = 10), 
+                             title.theme = element_text(size = 15), 
+                             label.theme = element_text(size = 15)),
+            size = guide_legend(title = "Harvested \ntomato \nlog10(acreage)", 
+                                title.theme = element_text(size = 15), 
+                                label.theme = element_text(size = 15)), 
+            edge_width = guide_legend(title = "Pest trade \nmovement potential", 
+                                      title.theme = element_text(size = 15), 
+                                      label.theme = element_text(size = 15))
+         )
+
+ggsave(plot = focused.net, filename = "Tuta-absoluta-tomato-net.svg",
+       width = 15, height = 11, units = "in", dpi = 250)
+```
+
+
+## Introduction risk in the United States of America
+```{r, fig.width=15, fig.height=10, dpi=200, message=FALSE}
+focused.countries<-c("USA")
+focused.PestMove<-PestMoveLinks %>%
+  filter(ImportCountry %in% focused.countries)
+focused.TradingCountries<-TradingCountries %>% 
+  filter(ExportCountry %in% unique(c(focused.PestMove$ExportCountry,focused.PestMove$ImportCountry)))
+focused.PestNet = graph_from_data_frame(d = focused.PestMove,
+                                        vertices = focused.TradingCountries,
+                                        directed = T)
+
+focused.net <- ggraph(focused.PestNet, layout = "stress")+
+  geom_edge_link(aes(edge_width = GeoTradeRisk, 
+                      start_cap = circle(.3), 
+                      end_cap = circle(.3)),                  
+                  edge_colour = "darkgrey",
+                  arrow = arrow(angle = 30, 
+                                length = unit(0.15, "inches")))+
+  geom_node_point(aes(fill = ExtentCat,
+                      color = ExtentCat,
+                      size = HostArea), 
+                  shape = 21)+
+  geom_node_text(aes(label = name), size = 6, 
+                 repel = TRUE)+
+  scale_edge_width_continuous(range = c(0.1,1.5))+
+  scale_size_continuous(range = c(1,10))+
+  scale_fill_manual(values = c("Unreported" = "#FCB519FF", "Transient under eradication" = "#F98C0AFF", "Few occurrences" = "#E35932FF", "Localized" = "#BB3754FF", "Present" = "#89226AFF", "Widespread" =  "#56106EFF"))+
+  scale_color_manual(values = c("Unreported" = "#FCB519FF", "Transient under eradication" = "#F98C0AFF", "Few occurrences" = "#E35932FF", "Localized" = "#BB3754FF", "Present" = "#89226AFF", "Widespread" =  "#56106EFF"))+
+  coord_fixed()+
+  theme_graph()+
+  theme(legend.position = "right", 
+        legend.key.size = unit(1, 'cm'))
+
+focused.net + 
+  guides(fill = guide_legend(title = "Reported distribution \nTuta absoluta",
+                                title.position = "top", 
+                                override.aes = list(size = 10), 
+                             title.theme = element_text(size = 15), 
+                             label.theme = element_text(size = 15)),
+         color = guide_legend(title = "Reported distribution \nTuta absoluta",
+                                title.position = "top", 
+                                override.aes = list(size = 10), 
+                             title.theme = element_text(size = 15), 
+                             label.theme = element_text(size = 15)),
+            size = guide_legend(title = "Harvested \ntomato \nlog10(acreage)", 
+                                title.theme = element_text(size = 15), 
+                                label.theme = element_text(size = 15)), 
+            edge_width = guide_legend(title = "Pest trade \nmovement potential", 
+                                      title.theme = element_text(size = 15), 
+                                      label.theme = element_text(size = 15))
+         )
+```
+
+
+## Pest introduction risk based on multiple network metrics
+```{r}
+# Calculating node centralities for each trading country
+country.betweenness<-igraph::betweenness(pestMoveNet,v=V(pestMoveNet), directed = TRUE, weights = 1/E(pestMoveNet)$GeoTradeRisk)
+
+country.PageRank <- page_rank(pestMoveNet, vids = V(pestMoveNet), directed = TRUE, weights = E(pestMoveNet)$GeoTradeRisk)
+
+country.eigenvector <- eigen_centrality(pestMoveNet, directed = TRUE, weights = E(pestMoveNet)$GeoTradeRisk)
+
+country.centralities<-data.frame(country.strength, country.betweenness, 
+                                 country.eigenvector$vector, country.PageRank$vector)
+country.centralities<-country.centralities%>%
+  mutate(country.strength=country.strength/max(country.strength),
+         country.betweenness=country.betweenness/max(country.betweenness),
+         country.PageRank.vector=country.PageRank.vector/max(country.PageRank.vector),
+         PTRI = country.strength/3+country.betweenness/3+country.eigenvector.vector/6+country.PageRank.vector/6,
+         PTRI = PTRI / max(PTRI))
+```
+
+
+## Pest introduction risk based on multiple network metrics
+```{r, fig.width=18, fig.height=15, dpi=300}
+multi.net <- ggraph(pestMoveNet, layout = "centrality", cent = country.centralities$PTRI^(1/2))+
+  geom_edge_link(aes(edge_width = GeoTradeRisk, 
+                      start_cap = circle(.3), 
+                      end_cap = circle(.3)),                  
+                  edge_colour = "darkgrey",
+                  arrow = arrow(angle = 30, 
+                                length = unit(0.15, "inches")))+
+  geom_node_point(aes(fill = ExtentCat,
+                      color = ExtentCat,
+                      size = exp(HostArea),
+                      shape = country.type))+
+  geom_node_text(aes(label = name), size = 6, 
+                 repel = TRUE)+
+  scale_shape_manual(values = c("Intermediary"=23, "Producer"=21))+
+  scale_edge_width_continuous(range = c(0.05,2))+
+  scale_size_continuous(range = c(1,10))+
+  scale_fill_manual(values = c("Unreported" = "#FCB519FF", "Transient under eradication" = "#F98C0AFF", "Few occurrences" = "#E35932FF", "Localized" = "#BB3754FF", "Present" = "#89226AFF", "Widespread" =  "#56106EFF"))+
+  scale_color_manual(values = c("Unreported" = "#FCB519FF", "Transient under eradication" = "#F98C0AFF", "Few occurrences" = "#E35932FF", "Localized" = "#BB3754FF", "Present" = "#89226AFF", "Widespread" =  "#56106EFF"))+
+  coord_fixed()+
+  theme_graph()+
+  theme(legend.position = "right", 
+        legend.key.size = unit(1, 'cm'))
+
+multi.net + 
+  guides(fill = guide_legend(title = "Reported distribution: \nTuta absoluta",
+                                title.position = "top", 
+                                override.aes = list(size = 10), 
+                             title.theme = element_text(size = 15), 
+                             label.theme = element_text(size = 15)),
+         color = guide_legend(title = "Reported distribution: \nTuta absoluta",
+                                title.position = "top", 
+                                override.aes = list(size = 10), 
+                             title.theme = element_text(size = 15), 
+                             label.theme = element_text(size = 15)),
+         shape = guide_legend(title = "Country category",
+                                title.position = "top", 
+                                override.aes = list(size = 10), 
+                             title.theme = element_text(size = 15), 
+                             label.theme = element_text(size = 15)),
+         size = guide_legend(title = "Harvested \ntomato \nlog10(acreage)", 
+                                title.theme = element_text(size = 15), 
+                                label.theme = element_text(size = 15)),
+         edge_width = guide_legend(title = "Pest trade \nmovement potential", 
+                                      title.theme = element_text(size = 15), 
+                                      label.theme = element_text(size = 15))
+         )
+```
+
+
