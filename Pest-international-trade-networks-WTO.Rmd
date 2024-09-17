@@ -166,6 +166,9 @@ PestDistribution[PestDistribution$Extent == "Transient under surveillance",3] <-
 PestDistribution[PestDistribution$Extent == "Transient under eradication",3] <- c("1")
 PestDistribution$Extent<-as.numeric(PestDistribution$Extent)
 
+PestDistribution$USOrder<-ifelse(PestDistribution$USOrder=="yes","yes","no")
+PestDistribution$Biosecurity<-ifelse(PestDistribution$USOrder=="yes",2,1)
+
 # Replacing long country names
 PestDistribution[PestDistribution == c("Antigua and Barbuda")] <- c("ANTI")
 PestDistribution[PestDistribution == c("Bahrain, Kingdom of")] <- c("Bahrain")
