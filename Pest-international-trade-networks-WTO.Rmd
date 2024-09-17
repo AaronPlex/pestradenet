@@ -84,7 +84,7 @@ CountryNodes <- unique(CountryNodes)
 
 ## Host distribution at the country level
 ```{r}
-host.distribution<-read.csv("FAOSTAT-Tomato-harveste-area-2011-2020.csv")
+host.distribution<-read.csv("FAOSTAT-Tomato-harvested-area-2011-2020.csv")
 host.distribution<-host.distribution[,c("Area","Year","Value")]
 colnames(host.distribution)<-c("ExportCountry","Year","HostArea")
 
@@ -139,7 +139,7 @@ host.distribution[host.distribution == c("Viet Nam")] <- c("Vietnam")
 
 ## Pest distribution at the country level
 ```{r message=FALSE, warning=FALSE}
-PestDistribution <- read.csv("C:/Users/plexaaron/UFL Dropbox/Aaron Plex Sula/168/2022/2022 Projects/Pathogen biogeography/Pathogen richness and diversity/Tomato/Tuta absoluta.csv")
+PestDistribution <- read.csv("Tuta absoluta.csv")
 PestDistribution<-PestDistribution[,c("Region","Presence", "Extent", "First.record","USOrder")]
 colnames(PestDistribution)<-c("ExportCountry","Presence", "Extent", "First.record","USOrder")
 
