@@ -285,7 +285,7 @@ rownames(biomatrix)=c(columnnames)
 #trade matrix time pest matrix times host matrix
 #I propose the name of this combination:
 #Geographic trade risk for pathogen introduction
-geoTradeRisk = pestmatrix * tradeMatrix * hostmatrix * page.matrix #* biomatrix
+geoTradeRisk = pestmatrix * tradeMatrix * hostmatrix * page.matrix * biomatrix
 
 #To convert from matrix to an edgelist
 library(reshape2)
