@@ -140,8 +140,8 @@ host.distribution[host.distribution == c("Viet Nam")] <- c("Vietnam")
 ## Pest distribution at the country level
 ```{r message=FALSE, warning=FALSE}
 PestDistribution <- read.csv("C:/Users/plexaaron/UFL Dropbox/Aaron Plex Sula/168/2022/2022 Projects/Pathogen biogeography/Pathogen richness and diversity/Tomato/Tuta absoluta.csv")
-PestDistribution<-PestDistribution[,c("Region","Presence", "Extent", "First.record")]
-colnames(PestDistribution)<-c("ExportCountry","Presence", "Extent", "First.record")
+PestDistribution<-PestDistribution[,c("Region","Presence", "Extent", "First.record","USOrder")]
+colnames(PestDistribution)<-c("ExportCountry","Presence", "Extent", "First.record","USOrder")
 
 # Identifying which regions are sub national observations
 is.subnational = (PestDistribution[grepl(" - ", PestDistribution$ExportCountry), ])
