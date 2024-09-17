@@ -270,16 +270,16 @@ hostmatrix=as.matrix(hostmatrix)
 colnames(hostmatrix)=c(columnnames)
 rownames(hostmatrix)=c(columnnames)
 
-##Creating a matrix of host availability
-#biomatr = TradingCountries$Biosecurity # yest = 10, no = 1
-#biomatr = 1 / biomatr
-#biomatr1 <- matrix(biomatr, , 1)
-#biomatr2 <- matrix(biomatr, 1, )
-#biomatrix <- biomatr1 %*% biomatr2
-#biomatrix=as.matrix(biomatrix)
+##Creating a matrix of pest-specific biosecurity
+biomatr = TradingCountries$Biosecurity # yes = 2, no = 1
+biomatr = 1 / biomatr
+biomatr1 <- matrix(biomatr, , 1)
+biomatr2 <- matrix(biomatr, 1, )
+biomatrix <- biomatr1 %*% biomatr2
+biomatrix=as.matrix(biomatrix)
 
-#colnames(biomatrix)=c(columnnames)
-#rownames(biomatrix)=c(columnnames)
+colnames(biomatrix)=c(columnnames)
+rownames(biomatrix)=c(columnnames)
 
 #Gravity model for pest trade movement potential which is 
 #trade matrix time pest matrix times host matrix
