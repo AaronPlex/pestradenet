@@ -303,17 +303,24 @@ pestMoveNet = graph_from_data_frame(d = PestMoveLinks,
 ```
 
 
-## Node in-strength as a measure of pest introduction risk
+## A joint measure of pest introduction risk
 ```{r, fig.width=18, fig.height=15, dpi=200, message=FALSE}
 library(ggraph)
 library(ggplot2)
 library(RColorBrewer)
 
-E(pestMoveNet)$weight <- E(pestMoveNet)$GeoTradeRisk
+# Calculating the relative risk of pest introduction in a country from any other country in the world
+No<-dim(geoTradeRisk)
+joint.risk<-rep(NaN, No[1])
 
-country.strength <- strength(pestMoveNet, v = V(pestMoveNet), mode = c("in"), weights = E(pestMoveNet)$weight)
+for (i in 1:No[1]) {
+  joint.risk[i] <- 1-prod(1-geoTradeRisk[1:No[1],i])
+}
 
-strength.net <- ggraph(pestMoveNet, layout = "centrality", cent = country.strength^(1/4))+
+#E(pestMoveNet)$weight <- E(pestMoveNet)$GeoTradeRisk
+#country.strength <- strength(pestMoveNet, v = V(pestMoveNet), mode = c("in"), weights = E(pestMoveNet)$weight)
+
+joint.net <- ggraph(pestMoveNet, layout = "centrality", cent = joint.risk^(1/4))+
   geom_edge_link(aes(edge_width = GeoTradeRisk, 
                       start_cap = circle(.3), 
                       end_cap = circle(.3)),                  
@@ -335,7 +342,7 @@ strength.net <- ggraph(pestMoveNet, layout = "centrality", cent = country.streng
   theme(legend.position = "right", 
         legend.key.size = unit(1, 'cm'))
 
-strength.net + 
+joint.net + 
   guides(fill = guide_legend(title = "Reported distribution: \nTuta absoluta",
                                 title.position = "top", 
                                 override.aes = list(size = 10), 
