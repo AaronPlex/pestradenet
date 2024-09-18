@@ -13,7 +13,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Organizing trade data:
 ```{r, message=FALSE}
 library(tidyverse)
-#library(dplyr)
 
 cropTradeWTO<-read.csv("WTO-Tomato-Trade-2011-2020.csv")
 cropTradeWTO<-cropTradeWTO[,c("Reporting.Economy", "Partner.Economy", "Year", "Value")]
