@@ -167,7 +167,7 @@ PestDistribution[PestDistribution$Extent == "Transient under eradication",3] <- 
 PestDistribution$Extent<-as.numeric(PestDistribution$Extent)
 
 PestDistribution$USOrder<-ifelse(PestDistribution$USOrder=="yes","yes","no")
-PestDistribution$Biosecurity<-ifelse(PestDistribution$USOrder=="yes",2,1)
+PestDistribution$Biosecurity<-ifelse(PestDistribution$USOrder=="yes",10,1)
 
 # Replacing long country names
 PestDistribution[PestDistribution == c("Antigua and Barbuda")] <- c("ANTI")
@@ -306,7 +306,6 @@ pestMoveNet = graph_from_data_frame(d = PestMoveLinks,
 ## A joint measure of pest introduction risk
 ```{r, fig.width=18, fig.height=15, dpi=200, message=FALSE}
 library(ggraph)
-library(ggplot2)
 library(RColorBrewer)
 
 # Calculating the relative risk of pest introduction in a country from any other country in the world
