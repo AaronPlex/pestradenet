@@ -414,8 +414,8 @@ focused.net<-focused.net +
                                       label.theme = element_text(size = 15))
          )
 
-ggsave(plot = focused.net, filename = "Tuta-absoluta-tomato-net.svg",
-       width = 15, height = 11, units = "in", dpi = 250)
+#ggsave(plot = focused.net, filename = "Tuta-absoluta-tomato-net.svg",
+#       width = 15, height = 11, units = "in", dpi = 250)
 ```
 
 
