@@ -321,7 +321,7 @@ for (i in 1:No[1]) {
 }
 
 V(pestMoveNet)$ExtentCat<-factor(V(pestMoveNet)$ExtentCat,
-                                 levels = c("Unreported", "Eradicated", "No longer present", "Intercepted only", "Transient under eradication", "Few occurrences", "Exporting interceptions", "Localized", "Present", "Widespread"))
+                                 levels = c("Unreported", "Eradicated", "No longer present", "Intercepted only", "Transient under eradication", "Transient under surveillance", "Few occurrences", "Exporting interceptions", "Localized", "Present", "Widespread"))
 
 joint.net <- ggraph(pestMoveNet, layout = "centrality", cent = joint.risk^(1/4))+
   geom_edge_link(aes(edge_width = GeoTradeRisk, 
@@ -338,8 +338,8 @@ joint.net <- ggraph(pestMoveNet, layout = "centrality", cent = joint.risk^(1/4))
                  repel = TRUE)+
   scale_edge_width_continuous(range = c(0.005,1))+
   scale_size_continuous(range = c(1,10))+
-  scale_fill_manual(values = c("Unreported" = "#FCB519FF", "Eradicated" = "#FCB519FF", "No longer present" = "#FCB519FF", "Intercepted only" = "#FCB519FF", "Transient under eradication" = "#F98C0AFF", "Few occurrences" = "#E35932FF", "Exporting interceptions" = "#BB3754FF", "Localized" = "#BB3754FF", "Present" = "#89226AFF", "Widespread" =  "#56106EFF"))+
-  scale_color_manual(values = c("Unreported" = "#FCB519FF", "Eradicated" = "#FCB519FF", "No longer present" = "#FCB519FF", "Intercepted only" = "#FCB519FF", "Transient under eradication" = "#F98C0AFF", "Few occurrences" = "#E35932FF", "Exporting interceptions" = "#BB3754FF", "Localized" = "#BB3754FF", "Present" = "#89226AFF", "Widespread" =  "#56106EFF"))+
+  scale_fill_manual(values = c("Unreported" = "#FCB519FF", "Eradicated" = "#FCB519FF", "No longer present" = "#FCB519FF", "Intercepted only" = "#FCB519FF", "Transient under eradication" = "#F98C0AFF", "Transient under surveillance" = "#F98C0AFF", "Few occurrences" = "#E35932FF", "Exporting interceptions" = "#BB3754FF", "Localized" = "#BB3754FF", "Present" = "#89226AFF", "Widespread" =  "#56106EFF"))+
+  scale_color_manual(values = c("Unreported" = "#FCB519FF", "Eradicated" = "#FCB519FF", "No longer present" = "#FCB519FF", "Intercepted only" = "#FCB519FF", "Transient under eradication" = "#F98C0AFF", "Transient under surveillance" = "#F98C0AFF", "Few occurrences" = "#E35932FF", "Exporting interceptions" = "#BB3754FF", "Localized" = "#BB3754FF", "Present" = "#89226AFF", "Widespread" =  "#56106EFF"))+
   coord_fixed()+
   theme_graph()+
   theme(legend.position = "right", 
@@ -377,7 +377,7 @@ focused.PestNet = graph_from_data_frame(d = focused.PestMove,
                                         vertices = focused.TradingCountries,
                                         directed = T)
 V(focused.PestNet)$ExtentCat<-factor(V(focused.PestNet)$ExtentCat,
-                                 levels = c("Unreported", "Eradicated", "No longer present", "Intercepted only", "Transient under eradication", "Few occurrences", "Exporting interceptions", "Localized", "Present", "Widespread"))
+                                 levels = c("Unreported", "Eradicated", "No longer present", "Intercepted only", "Transient under eradication", "Transient under surveillance", "Few occurrences", "Exporting interceptions", "Localized", "Present", "Widespread"))
 
 focused.net <- ggraph(focused.PestNet, layout = "stress")+
   geom_edge_link(aes(edge_width = GeoTradeRisk, 
@@ -394,8 +394,8 @@ focused.net <- ggraph(focused.PestNet, layout = "stress")+
                  repel = TRUE)+
   scale_edge_width_continuous(range = c(0.3,2.5))+
   scale_size_continuous(range = c(1,10))+
-  scale_fill_manual(values = c("Unreported" = "#FCB519FF", "Eradicated" = "#FCB519FF", "No longer present" = "#FCB519FF", "Intercepted only" = "#FCB519FF", "Transient under eradication" = "#F98C0AFF", "Few occurrences" = "#E35932FF", "Exporting interceptions" = "#BB3754FF", "Localized" = "#BB3754FF", "Present" = "#89226AFF", "Widespread" =  "#56106EFF"))+
-  scale_color_manual(values = c("Unreported" = "#FCB519FF", "Eradicated" = "#FCB519FF", "No longer present" = "#FCB519FF", "Intercepted only" = "#FCB519FF", "Transient under eradication" = "#F98C0AFF", "Few occurrences" = "#E35932FF", "Exporting interceptions" = "#BB3754FF", "Localized" = "#BB3754FF", "Present" = "#89226AFF", "Widespread" =  "#56106EFF"))+
+  scale_fill_manual(values = c("Unreported" = "#FCB519FF", "Eradicated" = "#FCB519FF", "No longer present" = "#FCB519FF", "Intercepted only" = "#FCB519FF", "Transient under eradication" = "#F98C0AFF", "Transient under surveillance" = "#F98C0AFF", "Few occurrences" = "#E35932FF", "Exporting interceptions" = "#BB3754FF", "Localized" = "#BB3754FF", "Present" = "#89226AFF", "Widespread" =  "#56106EFF"))+
+  scale_color_manual(values = c("Unreported" = "#FCB519FF", "Eradicated" = "#FCB519FF", "No longer present" = "#FCB519FF", "Intercepted only" = "#FCB519FF", "Transient under eradication" = "#F98C0AFF", "Transient under surveillance" = "#F98C0AFF", "Few occurrences" = "#E35932FF", "Exporting interceptions" = "#BB3754FF", "Localized" = "#BB3754FF", "Present" = "#89226AFF", "Widespread" =  "#56106EFF"))+
   coord_fixed()+
   theme_graph()+
   theme(legend.position = "right", 
@@ -436,7 +436,7 @@ focused.PestNet = graph_from_data_frame(d = focused.PestMove,
                                         vertices = focused.TradingCountries,
                                         directed = T)
 V(focused.PestNet)$ExtentCat<-factor(V(focused.PestNet)$ExtentCat,
-                                 levels = c("Unreported", "Eradicated", "No longer present", "Intercepted only", "Transient under eradication", "Few occurrences", "Exporting interceptions", "Localized", "Present", "Widespread"))
+                                 levels = c("Unreported", "Eradicated", "No longer present", "Intercepted only", "Transient under eradication", "Transient under surveillance", "Few occurrences", "Exporting interceptions", "Localized", "Present", "Widespread"))
 
 focused.net <- ggraph(focused.PestNet, layout = "stress")+
   geom_edge_link(aes(edge_width = GeoTradeRisk, 
@@ -453,8 +453,8 @@ focused.net <- ggraph(focused.PestNet, layout = "stress")+
                  repel = TRUE)+
   scale_edge_width_continuous(range = c(0.1,1.5))+
   scale_size_continuous(range = c(1,10))+
-  scale_fill_manual(values = c("Unreported" = "#FCB519FF", "Eradicated" = "#FCB519FF", "No longer present" = "#FCB519FF", "Intercepted only" = "#FCB519FF", "Transient under eradication" = "#F98C0AFF", "Few occurrences" = "#E35932FF", "Exporting interceptions" = "#BB3754FF", "Localized" = "#BB3754FF", "Present" = "#89226AFF", "Widespread" =  "#56106EFF"))+
-  scale_color_manual(values = c("Unreported" = "#FCB519FF", "Eradicated" = "#FCB519FF", "No longer present" = "#FCB519FF", "Intercepted only" = "#FCB519FF", "Transient under eradication" = "#F98C0AFF", "Few occurrences" = "#E35932FF", "Exporting interceptions" = "#BB3754FF", "Localized" = "#BB3754FF", "Present" = "#89226AFF", "Widespread" =  "#56106EFF"))+
+  scale_fill_manual(values = c("Unreported" = "#FCB519FF", "Eradicated" = "#FCB519FF", "No longer present" = "#FCB519FF", "Intercepted only" = "#FCB519FF", "Transient under eradication" = "#F98C0AFF", "Transient under surveillance" = "#F98C0AFF", "Few occurrences" = "#E35932FF", "Exporting interceptions" = "#BB3754FF", "Localized" = "#BB3754FF", "Present" = "#89226AFF", "Widespread" =  "#56106EFF"))+
+  scale_color_manual(values = c("Unreported" = "#FCB519FF", "Eradicated" = "#FCB519FF", "No longer present" = "#FCB519FF", "Intercepted only" = "#FCB519FF", "Transient under eradication" = "#F98C0AFF", "Transient under surveillance" = "#F98C0AFF", "Few occurrences" = "#E35932FF", "Exporting interceptions" = "#BB3754FF", "Localized" = "#BB3754FF", "Present" = "#89226AFF", "Widespread" =  "#56106EFF"))+
   coord_fixed()+
   theme_graph()+
   theme(legend.position = "right", 
@@ -522,8 +522,8 @@ multi.net <- ggraph(pestMoveNet, layout = "centrality", cent = country.centralit
   scale_shape_manual(values = c("Intermediary"=23, "Producer"=21))+
   scale_edge_width_continuous(range = c(0.05,2))+
   scale_size_continuous(range = c(1,10))+
-  scale_fill_manual(values = c("Unreported" = "#FCB519FF", "Eradicated" = "#FCB519FF", "No longer present" = "#FCB519FF", "Intercepted only" = "#FCB519FF", "Transient under eradication" = "#F98C0AFF", "Few occurrences" = "#E35932FF", "Exporting interceptions" = "#BB3754FF", "Localized" = "#BB3754FF", "Present" = "#89226AFF", "Widespread" =  "#56106EFF"))+
-  scale_color_manual(values = c("Unreported" = "#FCB519FF", "Eradicated" = "#FCB519FF", "No longer present" = "#FCB519FF", "Intercepted only" = "#FCB519FF", "Transient under eradication" = "#F98C0AFF", "Few occurrences" = "#E35932FF", "Exporting interceptions" = "#BB3754FF", "Localized" = "#BB3754FF", "Present" = "#89226AFF", "Widespread" =  "#56106EFF"))+
+  scale_fill_manual(values = c("Unreported" = "#FCB519FF", "Eradicated" = "#FCB519FF", "No longer present" = "#FCB519FF", "Intercepted only" = "#FCB519FF", "Transient under eradication" = "#F98C0AFF", "Transient under surveillance" = "#F98C0AFF", "Few occurrences" = "#E35932FF", "Exporting interceptions" = "#BB3754FF", "Localized" = "#BB3754FF", "Present" = "#89226AFF", "Widespread" =  "#56106EFF"))+
+  scale_color_manual(values = c("Unreported" = "#FCB519FF", "Eradicated" = "#FCB519FF", "No longer present" = "#FCB519FF", "Intercepted only" = "#FCB519FF", "Transient under eradication" = "#F98C0AFF", "Transient under surveillance" = "#F98C0AFF", "Few occurrences" = "#E35932FF", "Exporting interceptions" = "#BB3754FF", "Localized" = "#BB3754FF", "Present" = "#89226AFF", "Widespread" =  "#56106EFF"))+
   coord_fixed()+
   theme_graph()+
   theme(legend.position = "right", 
