@@ -320,6 +320,9 @@ for (i in 1:No[1]) {
   joint.risk[i] <- 1-prod(1-geoTradeRisk[1:No[1],i]/maxi)
 }
 
+V(pestMoveNet)$ExtentCat<-factor(V(pestMoveNet)$ExtentCat,
+                                 levels = c("Unreported", "Eradicated", "No longer present", "Intercepted only", "Transient under eradication", "Few occurrences", "Exporting interceptions", "Localized", "Present", "Widespread"))
+
 joint.net <- ggraph(pestMoveNet, layout = "centrality", cent = joint.risk^(1/4))+
   geom_edge_link(aes(edge_width = GeoTradeRisk, 
                       start_cap = circle(.3), 
@@ -373,6 +376,8 @@ focused.TradingCountries<-TradingCountries %>%
 focused.PestNet = graph_from_data_frame(d = focused.PestMove,
                                         vertices = focused.TradingCountries,
                                         directed = T)
+V(focused.PestNet)$ExtentCat<-factor(V(focused.PestNet)$ExtentCat,
+                                 levels = c("Unreported", "Eradicated", "No longer present", "Intercepted only", "Transient under eradication", "Few occurrences", "Exporting interceptions", "Localized", "Present", "Widespread"))
 
 focused.net <- ggraph(focused.PestNet, layout = "stress")+
   geom_edge_link(aes(edge_width = GeoTradeRisk, 
@@ -430,6 +435,8 @@ focused.TradingCountries<-TradingCountries %>%
 focused.PestNet = graph_from_data_frame(d = focused.PestMove,
                                         vertices = focused.TradingCountries,
                                         directed = T)
+V(focused.PestNet)$ExtentCat<-factor(V(focused.PestNet)$ExtentCat,
+                                 levels = c("Unreported", "Eradicated", "No longer present", "Intercepted only", "Transient under eradication", "Few occurrences", "Exporting interceptions", "Localized", "Present", "Widespread"))
 
 focused.net <- ggraph(focused.PestNet, layout = "stress")+
   geom_edge_link(aes(edge_width = GeoTradeRisk, 
