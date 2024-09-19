@@ -314,9 +314,10 @@ library(RColorBrewer)
 # Calculating the relative risk of pest introduction in a country from any other country in the world
 No<-dim(geoTradeRisk)
 joint.risk<-rep(NaN, No[1])
+maxi<-max(geoTradeRisk)
 
 for (i in 1:No[1]) {
-  joint.risk[i] <- 1-prod(1-geoTradeRisk[1:No[1],i])
+  joint.risk[i] <- 1-prod(1-geoTradeRisk[1:No[1],i]/maxi)
 }
 
 #E(pestMoveNet)$weight <- E(pestMoveNet)$GeoTradeRisk
