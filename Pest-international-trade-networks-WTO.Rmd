@@ -521,7 +521,7 @@ multi.net <- ggraph(pestMoveNet, layout = "centrality", cent = country.centralit
                  repel = TRUE)+
   scale_shape_manual(values = c("Intermediary"=23, "Producer"=21))+
   scale_edge_width_continuous(range = c(0.05,2))+
-  scale_size_continuous(range = c(1,10))+
+  scale_size_continuous(range = c(2,12))+
   scale_fill_manual(values = c("Unreported" = "#FCB519FF", "Eradicated" = "#FCB519FF", "No longer present" = "#FCB519FF", "Intercepted only" = "#FCB519FF", "Transient under eradication" = "#F98C0AFF", "Transient under surveillance" = "#F98C0AFF", "Few occurrences" = "#E35932FF", "Exporting interceptions" = "#BB3754FF", "Localized" = "#BB3754FF", "Present" = "#89226AFF", "Widespread" =  "#56106EFF"))+
   scale_color_manual(values = c("Unreported" = "#FCB519FF", "Eradicated" = "#FCB519FF", "No longer present" = "#FCB519FF", "Intercepted only" = "#FCB519FF", "Transient under eradication" = "#F98C0AFF", "Transient under surveillance" = "#F98C0AFF", "Few occurrences" = "#E35932FF", "Exporting interceptions" = "#BB3754FF", "Localized" = "#BB3754FF", "Present" = "#89226AFF", "Widespread" =  "#56106EFF"))+
   coord_fixed()+
