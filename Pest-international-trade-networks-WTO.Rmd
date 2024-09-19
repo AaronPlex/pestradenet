@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-## Organizing trade data:
+## Organizing trade data
 ```{r, message=FALSE}
 library(tidyverse)
 
