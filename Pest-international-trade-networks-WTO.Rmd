@@ -487,19 +487,22 @@ focused.net +
 E(pestMoveNet)$weight <- E(pestMoveNet)$GeoTradeRisk
 country.strength <- strength(pestMoveNet, v = V(pestMoveNet), mode = c("in"), weights = E(pestMoveNet)$weight)
 
-country.betweenness<-igraph::betweenness(pestMoveNet,v=V(pestMoveNet), directed = TRUE, weights = 1/E(pestMoveNet)$GeoTradeRisk)
+trans.weight<-1.0001*max(E(pestMoveNet)$GeoTradeRisk) - E(pestMoveNet)$GeoTradeRisk
+country.betweenness<-igraph::betweenness(pestMoveNet,v=V(pestMoveNet), directed = TRUE, weights = trans.weight)
 
-country.PageRank <- page_rank(pestMoveNet, vids = V(pestMoveNet), directed = TRUE, weights = E(pestMoveNet)$GeoTradeRisk)
+#country.PageRank <- page_rank(pestMoveNet, vids = V(pestMoveNet), directed = TRUE, weights = E(pestMoveNet)$GeoTradeRisk)
+#PageRank can be used better to measure a node's influence on other nodes as one component of PageRank scores is the number of outgoing links from a node (https://doi.org/10.1016/S0169-7552(98)00110-X).
 
-country.eigenvector <- eigen_centrality(pestMoveNet, directed = TRUE, weights = E(pestMoveNet)$GeoTradeRisk)
+country.eigenvector <- eigen_centrality(pestMoveNet, directed = TRUE, weights = E(pestMoveNet)$GeoTradeRisk, scale = TRUE)$vector
 
 country.centralities<-data.frame(country.strength, country.betweenness, 
-                                 country.eigenvector$vector, country.PageRank$vector)
+                                 country.eigenvector$vector)
+country.centralities<-data.frame(country.strength, country.betweenness, 
+                                 country.eigenvector, joint.risk)
 country.centralities<-country.centralities%>%
   mutate(country.strength=country.strength/max(country.strength),
          country.betweenness=country.betweenness/max(country.betweenness),
-         country.PageRank.vector=country.PageRank.vector/max(country.PageRank.vector),
-         PTRI = country.strength/3+country.betweenness/3+country.eigenvector.vector/6+country.PageRank.vector/6,
+         PTRI = country.strength+country.betweenness+country.eigenvector+joint.risk,
          PTRI = PTRI / max(PTRI))
 ```
 
