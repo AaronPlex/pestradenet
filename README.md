@@ -1,7 +1,7 @@
 # International Trade Networks
  In this code, we help to visualize international trade networks for the introduction potential of crop pathogens and pests.
  
-All datasets required for the analysis are publicly available:
+All datasets required for the analysis are publicly available at:
 * [FAO](https://www.fao.org/faostat/en/#data/TM) or [WTO](https://stats.wto.org/) for international trade,
 * [FAO](https://www.fao.org/faostat/en/#data/QCL) for harvested area, and
 * [CABI](https://www.cabi.org/isc/datasheet/59074053) or your own built datasheet for pest distribution at the national level.
