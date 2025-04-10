@@ -168,6 +168,7 @@ PestDistribution[PestDistribution$Extent == "No longer present",3] <- c("0")
 PestDistribution[PestDistribution$Extent == "Intercepted only",3] <- c("0")
 PestDistribution[PestDistribution$Extent == "Eradicated",3] <- c("0")
 PestDistribution$Extent<-as.numeric(PestDistribution$Extent)
+PestDistribution$Extent<-as.numeric(PestDistribution$Extent)
 
 PestDistribution$USOrder<-ifelse(PestDistribution$USOrder=="yes","yes","no")
 PestDistribution$Biosecurity<-ifelse(PestDistribution$USOrder=="yes",10,1)
